@@ -1,6 +1,8 @@
 const pool = require('../db');
 
-// Récupérer tous les commentaires d’un produit
+/**
+ * Récupérer tous les commentaires d’un produit
+ */
 exports.getCommentsByProduct = async (req, res) => {
   const productId = parseInt(req.params.productId, 10);
   if (isNaN(productId)) {
@@ -8,14 +10,22 @@ exports.getCommentsByProduct = async (req, res) => {
   }
 
   try {
+    const query = 'SELECT * FROM comments WHERE product_id = $1 ORDER BY created_at DESC';
     const result = await pool.query(
-      'SELECT * FROM comments WHERE product_id = $1 ORDER BY created_at DESC',
+      query,
       [productId]
     );
-    res.json(result.rows);
+
+    const comments = result.rows
+    res.status(200).json({
+      success: true,
+      query: query,
+      message: "Récupération des commentaires réussie",
+      data: comments,
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Erreur serveur' });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: 'Erreur serveur' });
   }
 };
 
@@ -29,11 +39,19 @@ exports.addComment = async (req, res) => {
   }
 
   try {
+    const query = `INSERT INTO comments (product_id, author, content) VALUES ($1, $2, $3) RETURNING *`;
     const result = await pool.query(
-      `INSERT INTO comments (product_id, author, content) VALUES ($1, $2, $3) RETURNING *`,
+      query,
       [productId, author, content]
     );
-    res.status(201).json(result.rows[0]);
+
+    const comments = result.rows[0];
+    res.status(200).json({
+      success: true,
+      query: query,
+      message: "Ajout du commentaire avec succès",
+      data: comments,
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur serveur' });

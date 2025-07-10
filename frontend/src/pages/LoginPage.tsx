@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { loginWithSqlVulnerability, loginSafely } from '../api'; // ✅ Assurez-vous d’avoir ces deux fonctions
+import { Link, useNavigate } from 'react-router-dom';
+import { loginWithSqlVulnerability, loginSafely } from '../api.ts'; // ✅ Assurez-vous d’avoir ces deux fonctions
 import { Eye, EyeOff } from 'lucide-react';
 
 const LoginPage = () => {
@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [sqliEnabled, setSqliEnabled] = useState(false); // 🔥 Toggle SQLi
   const navigate = useNavigate();
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e:any) => {
     e.preventDefault();
     setMessage('Connexion en cours...');
     setQuery('');
@@ -23,9 +23,10 @@ const LoginPage = () => {
     if (response.success) {
       setMessage(response.message);
       setQuery(response.query);
-      const userId = response.user?.id;
+      const userId = response.data?.id;
       localStorage.setItem('isAdmin', userId === 1 ? 'true' : 'false');
-      localStorage.setItem('username', response.user?.username);
+      localStorage.setItem('username', response.data?.username);
+      localStorage.setItem('userId', userId);
       setTimeout(() => {
         navigate(`/users/${userId}`);
       }, 3000);
@@ -138,6 +139,12 @@ const LoginPage = () => {
             </div>
           </form>
         </div>
+        <Link
+          to="/register"
+          className="mt-6 block text-center text-sm font-medium text-gray-600 hover:text-gray-900"
+        >
+          Vous n'avez pas de compte ? Inscrivez-vous
+        </Link>
       </div>
     </div>
   );

@@ -4,10 +4,11 @@ import ProductPage from "./pages/ProductPage";
 import LoginPage from "./pages/LoginPage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import { Link, BrowserRouter as Router, Routes, Route } from "react-router-dom";
-// import ViewUser from './pages/admin/ViewUser';
 import Navbar from "./components/Navbar";
 import "./App.css";
 import ViewUser from "./pages/admin/ViewUser";
+import PrivateRoute from "./guards/PrivateRoute";
+import RegisterPage from "./pages/RegisterPage";
 
 function App() {
   return (
@@ -17,10 +18,10 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products/:id" element={<ProductPage />} />
-          <Route path="/users/:id" element={<ViewUser />} />
+          <Route path="/users/:id" element={<PrivateRoute><ViewUser /></PrivateRoute>} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          {/* Ajoute d'autres routes ici si nécessaire */}
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
         </Routes>
       </main>
       <footer className="bg-gray-800 text-white">

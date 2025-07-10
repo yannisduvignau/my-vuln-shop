@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { addProduct, getUsers } from '../../api';
+import { addProduct, getUsers } from '../../api.ts';
 
 function AdminDashboard() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<{ id: number; username: string }[]>([]);
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
   const [message, setMessage] = useState('');
@@ -18,7 +18,7 @@ function AdminDashboard() {
           const userList = await getUsers();
           setUsers(userList);
         } catch (err) {
-          setError("Erreur lors du chargement des produits");
+          // setError("Erreur lors du chargement des produits");
           console.error("Error fetching users:", err);
         } finally {
           setLoading(false);
@@ -48,7 +48,7 @@ function AdminDashboard() {
     navigate('/');
   };
 
-  const handleSubmitProduct = async (e) => {
+  const handleSubmitProduct = async (e: any) => {
     e.preventDefault();
 
     if (!productName || !productPrice) {
@@ -122,7 +122,10 @@ function AdminDashboard() {
         <ul className="list-disc list-inside space-y-1">
           {users.map((user) => (
               <li key={user.id}>
-                <Link className="text-[#f34155] hover:underline">
+                <Link 
+                  to={`#`} 
+                  className="text-[#f34155] hover:underline"
+                >
                   Voir utilisateur {user.username} ({user.id})
                 </Link>
               </li>

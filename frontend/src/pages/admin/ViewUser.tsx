@@ -1,18 +1,31 @@
 import React, { use, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { getUserById } from '../../api';
-import AdminDashboard from "../admin/AdminDashboard";
+import { useParams, useNavigate } from 'react-router-dom';
+import { getUserById } from '../../api.ts';
+import AdminDashboard from "./AdminDashboard";
 
 function ViewUser() {
+  const navigate = useNavigate();
   const { id } = useParams();
-  const [user, setUser] = useState(null);
+  interface User {
+    id: number;
+    name: string;
+    username: string;
+    role: string;
+  }
+
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   useEffect(() => {
     const fetchUser = async () => {
-      const data = await getUserById(id);
+      const userId = id ? parseInt(id, 10) : undefined;
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+      const data = await getUserById(userId);
       console.log('Fetched user data:', data); // Debugging line
       setUser(data.user || null);
       setLoading(false);
@@ -37,8 +50,22 @@ function ViewUser() {
     );
   }
 
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
+    navigate('/login');
+  };
+
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+      <button
+        onClick={handleLogout}
+        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md mb-4"
+      >
+        Se déconnecter
+      </button>
       <h2 className="text-2xl font-bold text-gray-800 mb-4">
         Détails de l'utilisateur : <span className="text-[#f34155]">{user.name}</span>
       </h2>

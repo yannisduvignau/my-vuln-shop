@@ -1,51 +1,71 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProducts } from '../api';
+import { getProducts, getComments, addComment } from '../api.ts';
 
-const commentsDB = {
-  1: [{ author: 'Alice', text: 'Super T-shirt, j\'adore !' }],
-  2: [],
+// Define the Product type
+type Product = {
+  id: number;
+  name: string;
+  description: string;
+  price: string;
+  image?: string;
 };
 
 function ProductPage() {
   const { id } = useParams();
-  const [product, setProduct] = useState(null);
-  const [comments, setComments] = useState([]);
+  const [product, setProduct] = useState<Product | null>(null);
+  const [comments, setComments] = useState<{ author: string; content: string }[]>([]);
   const [newComment, setNewComment] = useState('');
-  const [xssEnabled, setXssEnabled] = useState(false); // 🧪 Toggle pour XSS
+  const [xssEnabled, setXssEnabled] = useState(false); // 🧪 Toggle XSS
 
-  useEffect(() => {
-    const fetchProduct = async () => {
-      const allProducts = await getProducts();
-      const found = allProducts.find((p) => String(p.id) === id);
-      setProduct(found || null);
-    };
-
-    fetchProduct();
-
-    // Simule la récupération de commentaires
-    setComments(commentsDB[id] || []);
-  }, [id]);
-
-  const escapeHTML = (str) => {
-    if (typeof str !== 'string') return '';
-    return str
-      .replace(/&/g, '&amp;')   // & d'abord
-      .replace(/</g, '&lt;')    // <
-      .replace(/>/g, '&gt;')    // >
-      .replace(/"/g, '&quot;')  // "
-      .replace(/'/g, '&#39;');  // '
+  const fetchComments = async () => {
+    const fetched = await getComments(Number(id));
+    setComments(fetched.data || []);
   };
 
-  const handleCommentSubmit = (e) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      const allProducts = await getProducts();
+      const foundProduct = allProducts.find((p: Product) => String(p.id) === id);
+      setProduct(foundProduct || null);
+      await fetchComments();
+    };
+
+    fetchData();
+  }, [id]);
+
+  const escapeHTML = (str: string): string => {
+    if (typeof str !== 'string') return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const handleCommentSubmit = async (e:any) => {
     e.preventDefault();
     const cleanText = xssEnabled
-      ? newComment.trim() // 🔥 vulnérable
-      : escapeHTML(newComment.trim()); // 🔒 sécurisé
+      ? newComment.trim()
+      : escapeHTML(newComment.trim());
 
     if (!cleanText) return;
-    setComments([...comments, { author: 'Visiteur', text: cleanText }]);
-    setNewComment('');
+
+    const author = localStorage.getItem('accessToken') ? localStorage.getItem('username') || 'Visiteur' : 'Visiteur';
+
+    const newCommentObj = {
+      productId: Number(id),
+      author: author,
+      content: cleanText,
+    };
+
+    const response = await addComment(newCommentObj, Number(id));
+    console.log('Comment response:', response); // Debugging line
+    if (response?.success) {
+      setNewComment('');
+      await fetchComments();
+    }
   };
 
   if (!product) {
@@ -83,7 +103,7 @@ function ProductPage() {
         Ajouter au panier
       </button>
 
-      <hr className="mt-10"/>
+      <hr className="mt-10" />
 
       <div className="mt-10">
         <h2 className="text-2xl font-semibold mb-4">Commentaires</h2>
@@ -93,9 +113,9 @@ function ProductPage() {
               <li key={index} className="bg-gray-100 p-3 rounded">
                 <strong>{comment.author}:</strong>{' '}
                 {xssEnabled ? (
-                  <span dangerouslySetInnerHTML={{ __html: comment.text }} />
+                  <span dangerouslySetInnerHTML={{ __html: comment.content }} />
                 ) : (
-                  <span>{comment.text}</span>
+                  <span>{comment.content}</span>
                 )}
               </li>
             ))}

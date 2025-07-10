@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, loginSafe } = require('../controllers/auth.controller');
+const { login, loginSafe, register } = require('../controllers/auth.controller');
 
 /**
  * @swagger
@@ -17,5 +17,13 @@ router.post('/login', login);
  *     summary: Connexion utilisateur safe
  */
 router.post('/login-safe', loginSafe);
+
+/**
+ * @swagger
+ * /api/register:
+ *   post:
+ *     summary: Inscription utilisateur
+ */
+router.post('/register', register);
 
 module.exports = router;

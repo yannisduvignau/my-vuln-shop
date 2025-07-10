@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getProducts } from "../api";
+import { getProducts } from "../api.ts";
 
-const HomePage = ({ setCurrentPage }) => {
-  const [products, setProducts] = useState([]);
+const HomePage = () => {
+  const [products, setProducts] = useState<{ id: string; name: string; category: string; price: string; image?: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -25,11 +25,12 @@ const HomePage = ({ setCurrentPage }) => {
 
   if (loading) {
     return (
-      <div className="homepage">
-        <div className="loading">Chargement...</div>
+      <div className="homepage flex justify-center items-center h-screen bg-white">
+        <div className="loader border-4 border-[#f34155] border-t-transparent rounded-full w-12 h-12 animate-spin"></div>
       </div>
     );
   }
+  
 
   if (error) {
     return (
