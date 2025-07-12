@@ -1,4 +1,4 @@
-const pool = require('../db');
+const client = require('../db');
 
 /**
  * Récupérer tous les commentaires d’un produit
@@ -11,7 +11,7 @@ exports.getCommentsByProduct = async (req, res) => {
 
   try {
     const query = 'SELECT * FROM comments WHERE product_id = $1 ORDER BY created_at DESC';
-    const result = await pool.query(
+    const result = await client.query(
       query,
       [productId]
     );
@@ -40,7 +40,7 @@ exports.addComment = async (req, res) => {
 
   try {
     const query = `INSERT INTO comments (product_id, author, content) VALUES ($1, $2, $3) RETURNING *`;
-    const result = await pool.query(
+    const result = await client.query(
       query,
       [productId, author, content]
     );
@@ -67,7 +67,7 @@ exports.deleteComment = async (req, res) => {
   }
 
   try {
-    const result = await pool.query('DELETE FROM comments WHERE id = $1', [commentId]);
+    const result = await client.query('DELETE FROM comments WHERE id = $1', [commentId]);
 
     if (result.rowCount === 0) {
       return res.status(404).json({ message: 'Commentaire non trouvé' });

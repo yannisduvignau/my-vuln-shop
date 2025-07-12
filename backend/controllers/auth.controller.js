@@ -1,4 +1,4 @@
-const pool = require("../db");
+const client = require("../db");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
@@ -23,7 +23,7 @@ exports.login = async (req, res) => {
   const query = `SELECT * FROM users WHERE username = '${username}' AND password = '${password}'`;
 
   try {
-    const result = await pool.query(query);
+    const result = await client.query(query);
     const user = result.rows[0];
 
     if (user) {
@@ -36,7 +36,7 @@ exports.login = async (req, res) => {
         token: token,
       });
     } else {
-      res.status(403).json({
+      res.json({
         success: false,
         query: query,
         message: "Identifiants incorrects",
@@ -45,7 +45,8 @@ exports.login = async (req, res) => {
     }
   } catch (err) {
     console.error(err.message);
-    res.status(500).json({ success: false, message: "Erreur serveur" });
+    console.error('Stack trace :', err.stack);
+    res.json({ success: false, message: err.message });
   }
 };
 
@@ -56,14 +57,12 @@ exports.loginSafe = async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
+    const result = await client.query("SELECT * FROM users WHERE username = $1", [
       username,
     ]);
 
     if (result.rows.length === 0) {
-      return res
-        .status(403)
-        .json({ success: false, message: "Identifiants incorrects" });
+      return res.json({ success: false, message: "Identifiants incorrects" });
     }
 
     const user = result.rows[0];
@@ -78,9 +77,7 @@ exports.loginSafe = async (req, res) => {
         token: token,
       });
     } else {
-      res
-        .status(403)
-        .json({ success: false, message: "Identifiants incorrects" });
+      res.json({ success: false, message: "Identifiants incorrects" });
     }
   } catch (err) {
     console.error(err.message);
@@ -103,7 +100,7 @@ exports.register = async (req, res) => {
 
   try {
     // Vérifie si l'utilisateur existe déjà
-    const userCheck = await pool.query(
+    const userCheck = await client.query(
       "SELECT * FROM users WHERE username = $1",
       [username]
     );
@@ -120,7 +117,7 @@ exports.register = async (req, res) => {
     // Insertion sécurisée
     const insertQuery =
       "INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id, username";
-    const result = await pool.query(insertQuery, [
+    const result = await client.query(insertQuery, [
       username,
       hashedPassword,
       "customer",

@@ -1,8 +1,8 @@
-const pool = require("../db");
+const client = require("../db");
 
 exports.products = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM products");
+    const result = await client.query("SELECT * FROM products");
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -18,8 +18,8 @@ exports.postProduct = async (req, res) => {
 
   console.log("Requête SQL exécutée :", query);
   try {
-    const result = await pool.query(query);
-    //   const result = await pool.query(query, [name, price]);
+    const result = await client.query(query);
+    //   const result = await client.query(query, [name, price]);
     if (result.rows.length > 0) {
       res.json({
         success: true,

@@ -1,8 +1,8 @@
-const pool = require('../db');
+const client = require('../db');
 
 exports.users = async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, username, role FROM users');
+    const result = await client.query('SELECT id, username, role FROM users');
     res.json(result.rows);
   } catch (err) {
     console.error(err.message);
@@ -16,7 +16,7 @@ exports.usersById = async (req, res) => {
 
   console.log('Requête SQL exécutée :', query);
   try {
-    const result = await pool.query(query);
+    const result = await client.query(query);
     if (result.rows.length > 0) {
       res.json({ success: true, message: 'Récupération avec succès', user: result.rows[0] });
     } else {

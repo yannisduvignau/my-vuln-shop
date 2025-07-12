@@ -20,11 +20,11 @@ export const loginWithSqlVulnerability = async (username: string, password: stri
     }
 
     return res.data;
-  } catch (err) {
+  } catch (err:any) {
     console.error('Erreur de connexion :', err);
     return {
       success: false,
-      message: 'Erreur lors de la tentative de connexion.',
+      message: err.message,
       user: null
     };
   }
@@ -42,11 +42,11 @@ export const loginSafely = async (username: string, password: string) => {
     }
 
     return res.data;
-  } catch (err) {
+  } catch (err:any) {
     console.error('Erreur de connexion :', err);
     return {
       success: false,
-      message: 'Erreur lors de la tentative de connexion.',
+      message: err.message,
       user: null
     };
   }
